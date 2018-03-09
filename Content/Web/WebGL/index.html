@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - 3MF</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				font-family: Monospace;
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			#info {
+				color: #fff;
+				position: absolute;
+				top: 10px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+
+			}
+
+			a { color: skyblue }
+			.button { background:#999; color:#eee; padding:0.2em 0.5em; cursor:pointer }
+			.highlight { background:orange; color:#fff; }
+
+			span {
+				display: inline-block;
+				width: 60px;
+				float: left;
+				text-align: center;
+			}
+
+		</style>
+	</head>
+	<body>
+		<div id="info">
+			Neuron visualizer test
+		</div>
+		
+		<script src="three.js"></script>
+		<script src="OBJLoader.js"></script>
+		<script src="OrbitControls.js"></script>		
+		<script src="Color.js"></script>		
+
+		<script>
+
+			var camera, scene, renderer;
+			var pointLight;
+			var mJSON={"Selection":[1, 21, 42, -24]};
+			init();
+
+			function init() {
+
+				scene = new THREE.Scene();
+				scene.add( new THREE.AmbientLight( 0x444444 ) );
+
+				pointLight = new THREE.PointLight( 0xffffff, 1);
+				pointLight.position.set( 80, 90, 90 );
+				
+
+				//Este es el color a actualzar durante la visualizacion
+				pointLight.color = new THREE.Color("rgb(255, 255, 255)");
+				
+				scene.add( pointLight );
+
+				camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 500 );
+				camera.position.set( 0, 0, 150 );
+				scene.add( camera );
+
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setClearColor( 0x333333 );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+
+				var manager = new THREE.LoadingManager();
+				manager.onProgress = function ( item, loaded, total ) {
+					console.log( item, loaded, total );
+				};
+				var onProgress = function ( xhr ) {
+					if ( xhr.lengthComputable ) {
+						var percentComplete = xhr.loaded / xhr.total * 100;
+						console.log( Math.round(percentComplete, 2) + '% downloaded' );
+					}
+				};
+				var onError = function ( xhr ) {
+				};
+				var loader = new THREE.OBJLoader( manager );
+				loader.load( './content/meshes/Piram_000.obj', function ( object ) {
+					object.traverse( function ( child ) {
+						if ( child instanceof THREE.Mesh ) {
+							//child.material.map = texture;
+							//child.material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+						}
+					} );
+					scene.add( object );
+
+				}, onProgress, onError );
+								
+				var controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.addEventListener( 'change', render );
+				controls.target.set( 80, 65, 35 );
+				controls.update();
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function myFunctionColor(r,g,b){
+				//alert('testing');
+				pointLight.color=new THREE.Color("rgb("+r+","+g+","+b+")");
+				//pointLight.position.set( 80, 90, 150 );
+				onWindowResize();
+
+			}
+			
+			function onWindowResize() 
+			{
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				render();
+			}
+
+			function render() 
+			{
+				//Actualizar la posicion de las luces con la campara para evitar sombras
+				pointLight.position.x = camera.position.x;
+				pointLight.position.y = camera.position.y;
+				pointLight.position.z = camera.position.z;
+				
+				renderer.render( scene, camera );			
+			}
+			
+			function myFunctionGetValue()
+			{
+				//	return 42;
+				//	return [4,5,6];
+				//return "TestString";
+				//return JSON.stringify([1, "false", false]);
+				return JSON.stringify(mJSON);
+			}
+			
+			function myParseJSON(pParse)
+			{
+				mJSON = JSON.parse(pParse);				
+			}
+			
+		</script>
+	</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+	<head>
+		<title>Titulo de la web</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width">
+                <link rel="stylesheet" href="./style.css" type="text/css" />
+	</head>
+
+<body>
+<script src="./d3/d3.js"></script>
+<script>
+
+var width = self.frameElement ? 960 : innerWidth,
+    height = self.frameElement ? 500 : innerHeight;
+
+var data = [ {"NId":0, "NAct":"I",PosX:100, PosY:100, CaC:[1,2,3,4,5,6]}
+            ,{"NId":1, "NAct":"E",PosX:100, PosY:200, CaC:[1,2,3,4,5,6]}
+            ,{"NId":2, "NAct":"I",PosX:200, PosY:100, CaC:[1,2,3,4,5,6]}
+            ,{"NId":3, "NAct":"E",PosX:200, PosY:200, CaC:[1,2,3,4,5,6]}
+            ,{"NId":4, "NAct":"I",PosX:200, PosY:300, CaC:[1,2,3,4,5,6]}
+            ,{"NId":5, "NAct":"I",PosX:300, PosY:100, CaC:[1,2,3,4,5,6]}
+            ,{"NId":6, "NAct":"E",PosX:300, PosY:200, CaC:[1,2,3,4,5,6]}
+            ,{"NId":7, "NAct":"I",PosX:300, PosY:300, CaC:[1,2,3,4,5,6]}            
+            ,{"NId":8, "NAct":"I",PosX:400, PosY:100, CaC:[1,2,3,4,5,6]}
+            ,{"NId":9, "NAct":"E",PosX:400, PosY:200, CaC:[1,2,3,4,5,6]}
+
+            ]
+            ;
+
+var self            =   this;
+var gSelectionIds   =   [];
+var self            =   this;
+var shiftKey        =   false;
+var selecting       =   false;
+
+zoomXScale= d3.scale
+            .linear()
+            .domain([0,this.width])
+            .range([this.padding,this.width-this.padding]);
+
+zoomYScale= d3.scale
+            .linear()
+            .domain([0,this.height])
+            .range([this.height-this.padding, this.padding]);
+
+noXScale = d3.scale
+            .linear()
+            .domain([0,this.width])
+            .range([0,this.width]);
+
+noYScale = d3.scale
+            .linear()
+            .domain([0,this.height])
+            .range([0, this.height]);
+
+
+zoombehavior = d3.behavior.zoom()
+                        .x(zoomXScale)
+                        .y(zoomYScale)
+                        .scaleExtent([1, 10])
+                        .on("zoom", zoom);
+
+var svg = d3.select("body")
+            .attr("tabindex", 1)
+            .on("keydown.brush", keyDown)
+            .on("keyup.brush", keyUp)
+            .each(function()
+                  {
+                    this.focus();
+                  }
+                )
+            .append("svg")
+            .attr("width", width)
+            .attr("height",height)
+            .attr("style", "outline: thin solid black;")
+            .append("g")
+            .call(zoombehavior)            
+            ;
+
+//For zooming
+svg.append("rect")
+    .attr("class", "overlay")
+    .attr("width",  width)
+    .attr("height", height)
+    .style("opacity","0.0")
+    ;
+
+//Create the neuronsrep
+gNeuronsRep = svg
+              .attr("class", "node")
+              .selectAll("path")
+              .data(data)
+              .enter()
+              .append("path")
+              .attr("d", d3.svg.symbol()
+              .type(function(d)
+                    {
+                    if (d.NAct == "E")	return "triangle-up";
+                    else                return "circle";
+                    }
+                    )
+               )
+              .attr("transform", function(d)
+                                 {
+                                     return "translate(" + d.PosX + "," + d.PosY + ")";
+                                 }
+                   )
+              .style("fill", "rgb(255,255,255)")
+              .style("stroke", function(d)
+                               {
+                                 if ((d.NAct == "E")) 	return "rgb(255,0,0)";
+                                 else					return "rgb(0,0,255)";
+                               }
+                              )
+              .on("mousedown", function(d)
+                               {
+                                   if (selecting)
+                                   {
+                                     d3.select(this).classed("selected", d.selected = !d.selected);
+                                   }
+                                   else
+                                   {
+                                     gNeuronsRep.classed("selected", function(p)
+                                                                       {
+                                                                         return p.selected = false;
+                                                                       });
+                                   }
+                               }
+              )
+              .on("mouseup", function(d)
+                             {
+                                 if (d.selected)
+                                 {
+                                         gSelectionIds.push(d.NId);
+                                 }
+                                 else
+                                 {
+                                         //removeA(gSelectionIds,d.NId);
+                                 }
+                             }
+              )
+              .on("mouseover", function(d)
+                               {
+                                 var xPos = d.PosX + 50;
+                                 var yPos = d.PosY;
+                                 var lIndex = 0;//_SimulationController.actSimStep % _SimulationData.numSimStepsPerFile;
+
+                                 d3.select("#tooltip")
+                                         .style("left", xPos + "px")
+                                         .style("top", yPos+ "px")
+                                         .text( "CaC=" + d.CaC[lIndex] //_SimulationData.gNeuronsDetails[d.NId].Calcium[lIndex]
+                                         );
+
+                                 d3.select("#tooltip").classed("hidden",false);
+
+                               })
+              .on("mouseout", function()
+                              {
+                                 d3.select("#tooltip").classed("hidden",true);
+                              }
+                 );
+
+this.brush = d3.svg.brush()
+              .x(noXScale)
+              .y(noYScale)
+              .on("brushstart", function(d)
+                                {
+                                    gSelectionIds = [];
+
+                                    if (selecting)
+                                    {
+                                        gNeuronsRep.each(function(d)
+                                                                 {
+                                                                    d.previouslySelected = shiftKey && d.selected;
+                                                                 }
+                                                         );
+                                    }
+                                })
+              .on("brush", function(d)
+                           {
+                                if (selecting)
+                                {
+                                    var extent = d3.event.target.extent();
+                                    gNeuronsRep.classed("selected", function(d)
+                                                                    {
+                                                                        return d.selected = d.previouslySelected ^
+                                                                                                                  (extent[0][0] <= d.PosX
+                                                                                                                  && d.PosX < extent[1][0]
+                                                                                                                  && extent[0][1] <= d.PosY
+                                                                                                                  && d.PosY < extent[1][1]);
+
+                                                                    });
+                                }
+                                else
+                                {
+                                        gNeuronsRep.classed("selected",function(d)
+                                                                        {
+                                                                            return d.selected = d.previouslySelected = false;
+                                                                        });
+                                        gSelectionIds = [];
+                                }
+                           })
+              .on("brushend", function(d)
+                              {
+                                  //gSelectionIds = [];                                  
+                                  for (var i=0;i<data.length;++i)
+                                  {
+                                        if (data[i].selected==1)
+                                              gSelectionIds.push(i);
+                                  }
+
+                                  d3.event.target.clear();
+                                  d3.select(this).call(d3.event.target);
+                              });
+
+svg.append("g")
+   .datum(function()
+          {
+            return {selected: false, previouslySelected: false};
+          }
+        )
+   .attr("class", "brush")
+   .call(this.brush);
+
+d3.select("g.brush").style("opacity", 0.0);
+
+function keyDown()
+{
+    shiftKey = d3.event.shiftKey || d3.event.metaKey;
+
+    if (shiftKey)
+    {
+        if (!selecting)
+        {
+            selecting=true;
+            d3.select("g.brush").style("opacity", 0.4);
+
+            svg.call(d3.behavior.zoom());
+        }
+    }
+}
+
+function keyUp()
+{
+    shiftKey = d3.event.shiftKey || d3.event.metaKey;
+
+    selecting=false;
+    d3.select("g.brush").style("opacity", 0.0);
+
+    svg.call(self.zoombehavior);
+
+    console.log(gSelectionIds);
+}
+
+function zoom()
+{
+    svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+function forceSelection()
+{
+	gNeuronsRep.classed("selected", function(p)
+									   {
+										   if (gSelectionIds.indexOf(p.NId)!=-1) 	return true;
+										   else 									return false;
+									   });	
+}
+
+function injectJSONforSelection(pSelection)
+{
+	gSelectionIds = pSelection;
+	forceSelection();
+}
+
+function extractJSONforSelection()
+{
+    return JSON.stringify({"Selection": gSelectionIds});	
+}
+
+</script>

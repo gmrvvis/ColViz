@@ -1,0 +1,3 @@
+#-*- mode: cmake -*-
+git_subproject(nett https://gitlab.gmrv.es/segalindo/nett.git e16d8e19)
+git_subproject(rapidjson https://github.com/Tencent/rapidjson.git f54b0e4)

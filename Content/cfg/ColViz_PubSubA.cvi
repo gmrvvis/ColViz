@@ -1,0 +1,14 @@
+{
+	"type":"nettCfg",
+    "protocol":"tcp",
+    "source":
+    {
+		"ip":"127.0.0.1",
+		"port":"6556"
+	},
+    "destiny":
+    {
+		"ip":"127.0.0.1",
+		"port":"6555"
+	}
+}

@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>../Content/icons/close.png</file>
+        <file>../Content/icons/home.png</file>
+        <file>../Content/icons/open_swc.png</file>
+        <file>../Content/icons/reconstruction.png</file>
+        <file>../Content/icons/settings.png</file>
+    </qresource>
+    <qresource prefix="/js">
+        <file>../Content/js/jquery.min.js</file>
+    </qresource>
+</RCC>
