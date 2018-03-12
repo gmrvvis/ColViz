@@ -1,0 +1,12 @@
+include_directories(${PROJECT_SOURCE_DIR})
+
+set(DBTEST_SOURCES main.cxx)
+
+set(DBTEST_LINK_LIBRARIES
+  ColViz
+  ${PROTOBUF_LIBRARIES}
+  ${libzmq_LIBRARIES}
+  ${MYSQLCONNECTORCPP_LIBRARY}
+  ${NETT_LIBRARIES})
+
+common_application(dbTest NOHELP)

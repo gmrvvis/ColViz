@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+message string_message
+{
+  string value = 1;
+
+  // Note: value = 1 stands for an identifier to enable backwards compatibility
+  // by numbering fields between different file versions across different 
+  // Protobuf versions. Thus, an updated version of the message received by a 
+  // non-updated application will automatically discard new fields to remain 
+  // stable and working properly. As a result, new fields added to .proto files 
+  // should be enumerated following the ongoing sequence e.g. "string name = 2;"
+  //  might be an example of how expanding the current file.
+}
