@@ -12,7 +12,8 @@ find_path(_nett_CMAKE_HELPERS_DIR NAMES CMakeHelpers.cmake
 )
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(NETT DEFAULT_MSG
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(nett
+  "nett NOT FOUND. Please provide NETT_ROOT (via cmake or env. var)"
   _nett_INCLUDE_DIR _nett_LIBRARY _nett_CMAKE_HELPERS_DIR )
 
 set(NETT_INCLUDE_DIRS ${_nett_INCLUDE_DIR})

@@ -19,25 +19,53 @@
  */
 
 #include "DBManager.h"
+#include "mysql_connection.h"
+
+#include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <cppconn/statement.h>
+#include <cppconn/prepared_statement.h>
+
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+
+
+namespace detail
+{
+  class DBManager
+  {
+  public:
+    rapidjson::Document mJsonCfg;
+    sql::Driver *driver;
+    sql::Connection *con;
+    sql::Statement *stmt;
+    sql::ResultSet *res;
+    sql::PreparedStatement *pstmt;
+  };
+}
+
 
 DBManager::DBManager ( const std::string & pFile )
 {
+  _impl = new detail::DBManager;
+
   mUserId = -1;
   parseFromFile( pFile );
   try
   {
     const std::string endpoint(
-        std::string( mJsonCfg["protocol"].GetString( ) ) + "://"
-            + mJsonCfg["database"]["ip"].GetString( ) + ":"
-            + mJsonCfg["database"]["port"].GetString( ) );
+        std::string( _impl->mJsonCfg["protocol"].GetString( ) ) + "://"
+            + _impl->mJsonCfg["database"]["ip"].GetString( ) + ":"
+            + _impl->mJsonCfg["database"]["port"].GetString( ) );
 
-    DBUser = mJsonCfg["database"]["user"].GetString( );
-    DBPass = mJsonCfg["database"]["pass"].GetString( );
-    DBSchema = mJsonCfg["database"]["schema"].GetString( );
+    DBUser = _impl->mJsonCfg["database"]["user"].GetString( );
+    DBPass = _impl->mJsonCfg["database"]["pass"].GetString( );
+    DBSchema = _impl->mJsonCfg["database"]["schema"].GetString( );
 
-    driver = get_driver_instance( );
-    con = driver->connect( endpoint, DBUser, DBPass );
-    con->setSchema( DBSchema );
+    _impl->driver = get_driver_instance( );
+    _impl->con = _impl->driver->connect( endpoint, DBUser, DBPass );
+    _impl->con->setSchema( DBSchema );
   }
   catch ( sql::SQLException &e )
   {
@@ -60,7 +88,8 @@ DBManager::DBManager ( const std::string & pFile )
 
 DBManager::~DBManager ( )
 {
-  delete con;
+  delete _impl->con;
+  delete _impl;
 }
 
 void DBManager::parseFromFile ( const std::string & pFile )
@@ -77,7 +106,7 @@ void DBManager::parseFromFile ( const std::string & pFile )
       file_contents += str; // + "\n";
     }
 
-    if ( mJsonCfg.Parse( file_contents.c_str( ) ).HasParseError( ) ) throw ( 0 );
+    if ( _impl->mJsonCfg.Parse( file_contents.c_str( ) ).HasParseError( ) ) throw ( 0 );
   }
   catch ( const std::ifstream::failure& e )
   {
@@ -100,33 +129,33 @@ void DBManager::parseFromFile ( const std::string & pFile )
 
 void DBManager::simpleQuery ( )
 {
-  pstmt = con->prepareStatement( "SELECT * FROM USERS ORDER BY ID ASC" );
-  res = pstmt->executeQuery( );
+  _impl->pstmt = _impl->con->prepareStatement( "SELECT * FROM USERS ORDER BY ID ASC" );
+  _impl->res = _impl->pstmt->executeQuery( );
 
-  while ( res->next( ) )
+  while ( _impl->res->next( ) )
   {
-    std::cout << "\t... MySQL counts: " << res->getInt( "ID" )
-        << res->getString( "NAME" ) << std::endl;
+    std::cout << "\t... MySQL counts: " << _impl->res->getInt( "ID" )
+        << _impl->res->getString( "NAME" ) << std::endl;
   }
 
-  delete res;
-  delete pstmt;
+  delete _impl->res;
+  delete _impl->pstmt;
 }
 
 bool DBManager::logIn ( const std::string & name, const std::string & pass )
 {
-  pstmt = con->prepareStatement(
+  _impl->pstmt = _impl->con->prepareStatement(
       "SELECT ID FROM USERS WHERE NAME='" + name + "' AND USERPASSWORD='" + pass
           + "';" );
-  res = pstmt->executeQuery( );
+  _impl->res = _impl->pstmt->executeQuery( );
 
-  while ( res->next( ) )
+  while ( _impl->res->next( ) )
   {
-    mUserId = res->getInt( "ID" );
+    mUserId = _impl->res->getInt( "ID" );
   }
 
-  delete res;
-  delete pstmt;
+  delete _impl->res;
+  delete _impl->pstmt;
 
   if ( mUserId != -1 ) return true;
   else
@@ -135,56 +164,56 @@ bool DBManager::logIn ( const std::string & name, const std::string & pass )
 
 void DBManager::loadSessions ( std::vector<std::string> & content )
 {
-  pstmt = con->prepareStatement(
+  _impl->pstmt = _impl->con->prepareStatement(
       "SELECT ID, DESCRIPTION FROM SESSIONS WHERE USERID="
           + std::to_string( mUserId ) + ";" );
-  res = pstmt->executeQuery( );
+  _impl->res = _impl->pstmt->executeQuery( );
 
-  while ( res->next( ) )
+  while ( _impl->res->next( ) )
   {
-    content.push_back( res->getString( "DESCRIPTION" ) );
+    content.push_back( _impl->res->getString( "DESCRIPTION" ) );
   }
 
-  delete res;
-  delete pstmt;
+  delete _impl->res;
+  delete _impl->pstmt;
 }
 
 void DBManager::loadDialogs ( unsigned int pSessionId,
     std::vector<std::string> & content )
 {
-  pstmt =
-      con->prepareStatement(
+  _impl->pstmt =
+      _impl->con->prepareStatement(
           "SELECT USERS.NAME AS NAME, DIALOGS.MESSAGE AS MESSAGE FROM DIALOGS INNER JOIN USERS where USERS.ID = DIALOGS.USERID and DIALOGS.SESSIONID="
               + std::to_string( pSessionId ) + ";" );
-  res = pstmt->executeQuery( );
+  _impl->res = _impl->pstmt->executeQuery( );
 
-  while ( res->next( ) )
+  while ( _impl->res->next( ) )
   {
     content.push_back(
-        "[" + res->getString( "NAME" ) + "]: " + res->getString( "MESSAGE" ) );
+        "[" + _impl->res->getString( "NAME" ) + "]: " + _impl->res->getString( "MESSAGE" ) );
   }
 
   mSession = pSessionId;
 
-  delete res;
-  delete pstmt;
+  delete _impl->res;
+  delete _impl->pstmt;
 }
 
 void DBManager::storeMessage ( const std::string & message )
 {
-  pstmt = con->prepareStatement(
+  _impl->pstmt = _impl->con->prepareStatement(
       "INSERT INTO DIALOGS (MESSAGE, USERID, SESSIONID) VALUES('" + message
           + "'," + std::to_string( mUserId ) + ", " + std::to_string( mSession )
           + ")" );
-  pstmt->executeUpdate( );
+  _impl->pstmt->executeUpdate( );
 }
 
 std::string DBManager::getUserName ( )
 {
   std::cout << "User Id" << mUserId << std::endl;
-  pstmt = con->prepareStatement(
+  _impl->pstmt = _impl->con->prepareStatement(
       "SELECT NAME FROM USERS WHERE ID = " + std::to_string( mUserId ) + ";" );
-  res = pstmt->executeQuery( );
-  res->next( );
-  return res->getString( "NAME" );
+  _impl->res = _impl->pstmt->executeQuery( );
+  _impl->res->next( );
+  return _impl->res->getString( "NAME" );
 }

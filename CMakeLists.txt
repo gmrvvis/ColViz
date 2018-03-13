@@ -47,8 +47,9 @@ common_find_package(Threads SYSTEM REQUIRED)
 common_find_package(QGLViewer SYSTEM REQUIRED)
 common_find_package(OpenGL SYSTEM REQUIRED)
 common_find_package(GLUT SYSTEM REQUIRED)
-
 common_find_package_post( )
+
+set(COLVIZ_DEPENDENT_LIBRARIES nett libzmq Protobuf)
 
 add_subdirectory( colviz )
 add_subdirectory( colviz/utils )
@@ -66,3 +67,9 @@ include(DoxygenRule)
 
 include(CPackConfig)
 include(CTest)
+
+set(COLVIZ_DEPS_FINDS nett libzmq)
+foreach( COLVIZ_DEPS_FIND ${COLVIZ_DEPS_FINDS} )
+  install(FILES CMake/Find${COLVIZ_DEPS_FIND}.cmake
+    DESTINATION share/ColViz/CMake COMPONENT dev)
+endforeach( )

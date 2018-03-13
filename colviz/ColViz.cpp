@@ -19,16 +19,31 @@
  */
 
 #include "ColViz.h"
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <memory>
+
+namespace detail
+{
+  class ColViz
+  {
+  public:
+    rapidjson::Document mJsonCfg;
+    rapidjson::Document mJsonTmp;
+  };
+}
 
 ColViz::ColViz ( const std::string & pFile )
 {
+  _impl = new detail::ColViz;
+
   parseFromFile( pFile );
-  if ( strcmp( mJsonCfg["type"].GetString( ), "nettCfg" ) == 0 )
+  if ( strcmp( _impl->mJsonCfg["type"].GetString( ), "nettCfg" ) == 0 )
   {
     const std::string endpoint(
-        std::string( mJsonCfg["protocol"].GetString( ) ) + "://"
-            + mJsonCfg["source"]["ip"].GetString( ) + ":"
-            + mJsonCfg["source"]["port"].GetString( ) );
+        std::string( _impl->mJsonCfg["protocol"].GetString( ) ) + "://"
+            + _impl->mJsonCfg["source"]["ip"].GetString( ) + ":"
+            + _impl->mJsonCfg["source"]["port"].GetString( ) );
 
     mDestinyEndPoint = mSourceEndPoint = endpoint;
 
@@ -37,13 +52,13 @@ ColViz::ColViz ( const std::string & pFile )
 
     nett::initialize( mSourceEndPoint );
 
-    if ( !mJsonCfg["destiny"].IsNull( ) )
+    if ( !_impl->mJsonCfg["destiny"].IsNull( ) )
     {
-      mDestinyEndPoint = mJsonCfg["protocol"].GetString( );
+      mDestinyEndPoint = _impl->mJsonCfg["protocol"].GetString( );
       mDestinyEndPoint += "://";
-      mDestinyEndPoint += mJsonCfg["destiny"]["ip"].GetString( );
+      mDestinyEndPoint += _impl->mJsonCfg["destiny"]["ip"].GetString( );
       mDestinyEndPoint += ":";
-      mDestinyEndPoint += mJsonCfg["destiny"]["port"].GetString( );
+      mDestinyEndPoint += _impl->mJsonCfg["destiny"]["port"].GetString( );
 
       if ( mShowMessages ) std::cout
           << "ColViz--->>>Calculated Destiny endpoint:" << mDestinyEndPoint
@@ -53,7 +68,7 @@ ColViz::ColViz ( const std::string & pFile )
   //ZeroEQ configuration
   else
   {
-    std::cout << "ColViz--->>>Cfg:" << mJsonCfg["type"].GetString( )
+    std::cout << "ColViz--->>>Cfg:" << _impl->mJsonCfg["type"].GetString( )
         << std::endl;
     //On-going! ...
   }
@@ -61,6 +76,7 @@ ColViz::ColViz ( const std::string & pFile )
 
 ColViz::~ColViz ( )
 {
+  delete _impl;
 }
 
 void ColViz::parseFromFile ( const std::string & pFile )
@@ -78,7 +94,7 @@ void ColViz::parseFromFile ( const std::string & pFile )
       file_contents += str; // + "\n";
     }
 
-    if ( mJsonCfg.Parse( file_contents.c_str( ) ).HasParseError( ) ) throw ( 0 );
+    if ( _impl->mJsonCfg.Parse( file_contents.c_str( ) ).HasParseError( ) ) throw ( 0 );
   }
   catch ( const std::ifstream::failure& e )
   {
@@ -117,9 +133,9 @@ std::string ColViz::receiveMassage ( )
 void ColViz::prepareMessage ( const std::string & json )
 {
   rapidjson::StringBuffer sb;
-  if ( mJsonTmp.Parse( json.c_str( ) ).HasParseError( ) ) throw 0;
+  if ( _impl->mJsonTmp.Parse( json.c_str( ) ).HasParseError( ) ) throw 0;
   rapidjson::PrettyWriter<rapidjson::StringBuffer> writer( sb );
-  mJsonTmp.Accept( writer );
+  _impl->mJsonTmp.Accept( writer );
   message.set_value( sb.GetString( ) );
 }
 

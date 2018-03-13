@@ -29,15 +29,18 @@
 #include <nett/nett.h>
 #include <colviz/string_message.pb.h>
 
-#include <rapidjson/document.h>
-#include <rapidjson/prettywriter.h>
-
 #include "helpers.hpp"
+
+#include <memory>
+
+namespace detail
+{
+  class ColViz;
+}
 
 class ColViz
 {
-    rapidjson::Document mJsonCfg;
-    rapidjson::Document mJsonTmp;
+    detail::ColViz* _impl;
 
     std::string mSourceEndPoint;
     std::string mDestinyEndPoint;

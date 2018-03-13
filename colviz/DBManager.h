@@ -29,31 +29,19 @@
 #include <stdexcept>
 #include <vector>
 
-#include "mysql_connection.h"
-
-#include <cppconn/driver.h>
-#include <cppconn/exception.h>
-#include <cppconn/resultset.h>
-#include <cppconn/statement.h>
-#include <cppconn/prepared_statement.h>
-
-#include <rapidjson/document.h>
-#include <rapidjson/prettywriter.h>
+namespace detail
+{
+  class DBManager;
+};
 
 class DBManager
 {
-    rapidjson::Document mJsonCfg;
+    detail::DBManager *_impl;
 
     std::string DBHost;
     std::string DBUser;
     std::string DBPass;
     std::string DBSchema;
-
-    sql::Driver *driver;
-    sql::Connection *con;
-    sql::Statement *stmt;
-    sql::ResultSet *res;
-    sql::PreparedStatement *pstmt;
 
     int mUserId;
     int mSession;

@@ -11,7 +11,8 @@ find_library(_openMesh_TOOLS_LIBRARY NAMES OpenMeshTools
   PATHS /usr/lib/OpenMesh /usr/local/lib/OpenMesh /opt/local/lib/OpenMesh)
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(OPENMESH DEFAULT_MSG
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenMesh
+  "OpenMesh NOT FOUND. Specific location can be provided by OPENMESH_ROOT (via cmake or env. var)"
   _openMesh_INCLUDE_DIR _openMesh_CORE_LIBRARY _openMesh_TOOLS_LIBRARY)
 
 set(OPENMESH_INCLUDE_DIRS ${_openMesh_INCLUDE_DIR})

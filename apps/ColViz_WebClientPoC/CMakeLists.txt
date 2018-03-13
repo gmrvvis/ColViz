@@ -20,7 +20,7 @@ set(COLVIZWEBCLIENT_LINK_LIBRARIES
   Qt5::WebEngine
   Qt5::WebEngineWidgets
   ${PROTOBUF_LIBRARIES}
-  ${libzmq_LIBRARIES}
+  ${LIBZMQ_LIBRARY}
   ${CMAKE_THREAD_LIBS_INIT})
 
 common_application(ColVizWebClient NOHELP)

@@ -46,5 +46,6 @@ if(QGLVIEWER_LIBRARY_RELEASE)
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(QGLVIEWER DEFAULT_MSG
+find_package_handle_standard_args(QGLViewer
+  "QGLViewer NOT FOUND. Please provide QGLVIEWER_ROOT (via cmake or env. var)"
   QGLVIEWER_INCLUDE_DIR QGLVIEWER_LIBRARY)
