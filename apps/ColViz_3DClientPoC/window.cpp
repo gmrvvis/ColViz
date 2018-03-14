@@ -60,10 +60,10 @@ Window::Window ( QWidget *parent ) :
 
   ui->lineEdit_password->setEchoMode( QLineEdit::Password );
 
-  mColViz = NULL;
-  mDBManager = NULL;
-  subThread = NULL;
-  mUser = "[User not logged in]: ";
+  mColViz 	= nullptr;
+  mDBManager 	= nullptr;
+  subThread 	= nullptr;
+  mUser 	= "[User not logged in]: ";
 }
 
 Window::~Window ( )
@@ -112,14 +112,26 @@ void Window::setupColViz ( )
 
   if ( !fileName.isNull( ) )
   {
-    if ( mColViz != NULL )
+    if ( mColViz != nullptr )
     {
       delete mColViz;
+      mColViz = nullptr;
       std::terminate( );
       delete subThread;
+      subThread = nullptr;
     }
 
-    mColViz = new ColViz( fileName.toStdString( ) );
+    try
+    {
+      mColViz = new ColViz( fileName.toStdString( ) );
+    }
+    catch ( ... )
+    {
+      std::cerr << "Exception detected. ColViz will not be started." << std::endl;
+      ui->groupBox_ColVizInteract->setEnabled( false );
+      return;
+    }
+    
     ui->myGLWidget->setColViz( mColViz );
 
     subThread = new std::thread( &Window::receiveMessage, this );
@@ -132,6 +144,7 @@ void Window::setupColViz ( )
         SLOT( updateCamera( ) ) );
 
     ui->groupBox_ColVizInteract->setEnabled( true );
+    ui->pushButton_loadColVizCfgFile->setEnabled( false );
   }
 }
 
@@ -142,12 +155,25 @@ void Window::setupPersistence ( )
 
   if ( !fileName.isNull( ) )
   {
-    if ( mDBManager != NULL )
+    if ( mDBManager != nullptr )
     {
       delete mDBManager;
+      mDBManager=nullptr;
     }
 
-    mDBManager = new DBManager( fileName.toStdString( ) );
+    try
+    {
+      mDBManager = new DBManager( fileName.toStdString( ) );
+    }
+    catch ( ... )
+    {
+      std::cerr << "Exception detected. Persistence System is not active" << std::endl;
+      ui->groupBox_logIn->setEnabled( false );
+      ui->comboBox_sessioId->clear( );
+      ui->pushButton_LogOut->setEnabled( false );
+      return;
+    }
+
     ui->groupBox_logIn->setEnabled( true );
   }
 }
@@ -172,6 +198,10 @@ void Window::logInOnPersistenceSystem ( )
 
     ui->pushButton_LogOut->setEnabled( true );
     ui->groupBox_logIn->setEnabled( false );
+  }
+  else
+  {
+    std::cerr<<"Incorrect user or password, please try it again!."<<std::endl;
   }
 }
 
@@ -219,7 +249,7 @@ void Window::sendMessage ( )
 {
   if ( ui->plainTextEdit_textToSend->toPlainText( ).length( ) > 0 )
   {
-    if ( mDBManager != NULL )
+    if ( mDBManager != nullptr )
     {
       mDBManager->storeMessage(
           ui->plainTextEdit_textToSend->toPlainText( ).toStdString( ) );

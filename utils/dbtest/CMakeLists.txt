@@ -1,6 +1,6 @@
 include_directories(${PROJECT_SOURCE_DIR})
 
-set(DBTEST_SOURCES main.cxx)
+set(DBTEST_SOURCES main.cpp)
 
 set(DBTEST_LINK_LIBRARIES
   ColViz

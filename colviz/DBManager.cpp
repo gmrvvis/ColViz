@@ -51,9 +51,10 @@ DBManager::DBManager ( const std::string & pFile )
   _impl = new detail::DBManager;
 
   mUserId = -1;
-  parseFromFile( pFile );
   try
   {
+    parseFromFile( pFile );
+
     const std::string endpoint(
         std::string( _impl->mJsonCfg["protocol"].GetString( ) ) + "://"
             + _impl->mJsonCfg["database"]["ip"].GetString( ) + ":"
@@ -81,8 +82,12 @@ DBManager::DBManager ( const std::string & pFile )
     std::cout << "# ERR: " << e.what( );
     std::cout << " (MySQL error code: " << e.getErrorCode( );
     std::cout << ", SQLState: " << e.getSQLState( ) << " )" << std::endl;
-
-    //return EXIT_FAILURE;
+    throw 1;
+  }
+  catch ( ... )
+  {
+    std::cerr << "Propagating exception ..."<< std::endl;
+    throw 0;
   }
 }
 
@@ -117,7 +122,8 @@ void DBManager::parseFromFile ( const std::string & pFile )
     switch ( e )
     {
       case 0:
-        std::cout << "Error parsing file:" + pFile + "\n";
+        std::cout << "Error parsing config Persistence System file:" + pFile + "\n";
+        throw 0;
         break;
       default:
         break;
@@ -210,7 +216,6 @@ void DBManager::storeMessage ( const std::string & message )
 
 std::string DBManager::getUserName ( )
 {
-  std::cout << "User Id" << mUserId << std::endl;
   _impl->pstmt = _impl->con->prepareStatement(
       "SELECT NAME FROM USERS WHERE ID = " + std::to_string( mUserId ) + ";" );
   _impl->res = _impl->pstmt->executeQuery( );

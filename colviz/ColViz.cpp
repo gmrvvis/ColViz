@@ -37,40 +37,53 @@ ColViz::ColViz ( const std::string & pFile )
 {
   _impl = new detail::ColViz;
 
-  parseFromFile( pFile );
-  if ( strcmp( _impl->mJsonCfg["type"].GetString( ), "nettCfg" ) == 0 )
+  try
   {
-    const std::string endpoint(
-        std::string( _impl->mJsonCfg["protocol"].GetString( ) ) + "://"
-            + _impl->mJsonCfg["source"]["ip"].GetString( ) + ":"
-            + _impl->mJsonCfg["source"]["port"].GetString( ) );
+    parseFromFile( pFile );
 
-    mDestinyEndPoint = mSourceEndPoint = endpoint;
-
-    if ( mShowMessages ) std::cout << "ColViz--->>> Calculated Source endpoint:"
-        << mSourceEndPoint << std::endl;
-
-    nett::initialize( mSourceEndPoint );
-
-    if ( !_impl->mJsonCfg["destiny"].IsNull( ) )
+    if ( strcmp( _impl->mJsonCfg["type"].GetString( ), "nettCfg" ) == 0 )
     {
-      mDestinyEndPoint = _impl->mJsonCfg["protocol"].GetString( );
-      mDestinyEndPoint += "://";
-      mDestinyEndPoint += _impl->mJsonCfg["destiny"]["ip"].GetString( );
-      mDestinyEndPoint += ":";
-      mDestinyEndPoint += _impl->mJsonCfg["destiny"]["port"].GetString( );
+      const std::string endpoint(
+	      std::string( _impl->mJsonCfg["protocol"].GetString( ) ) + "://"
+		      + _impl->mJsonCfg["source"]["ip"].GetString( ) + ":"
+		      + _impl->mJsonCfg["source"]["port"].GetString( ) );
 
-      if ( mShowMessages ) std::cout
-          << "ColViz--->>>Calculated Destiny endpoint:" << mDestinyEndPoint
-          << std::endl;
+      mDestinyEndPoint = mSourceEndPoint = endpoint;
+
+      if ( mShowMessages ) std::cout << "ColViz--->>> Calculated Source endpoint:"
+	      << mSourceEndPoint << std::endl;
+
+      nett::initialize( mSourceEndPoint );
+
+      if ( !_impl->mJsonCfg["destiny"].IsNull( ) )
+      {
+	mDestinyEndPoint = _impl->mJsonCfg["protocol"].GetString( );
+	mDestinyEndPoint += "://";
+	mDestinyEndPoint += _impl->mJsonCfg["destiny"]["ip"].GetString( );
+	mDestinyEndPoint += ":";
+	mDestinyEndPoint += _impl->mJsonCfg["destiny"]["port"].GetString( );
+
+	if ( mShowMessages ) std::cout
+		<< "ColViz--->>>Calculated Destiny endpoint:" << mDestinyEndPoint
+		<< std::endl;
+      }
+    }
+    //ZeroEQ configuration
+    else
+    {
+      std::cout << "ColViz--->>>Cfg:" << _impl->mJsonCfg["type"].GetString( )
+	      << std::endl;
+      //On-going! ...
     }
   }
-  //ZeroEQ configuration
-  else
+  catch (std::exception &e)
   {
-    std::cout << "ColViz--->>>Cfg:" << _impl->mJsonCfg["type"].GetString( )
-        << std::endl;
-    //On-going! ...
+    std::cerr << "Uncaught exception parsing config file: " << e.what() << std::endl;
+  }
+  catch (int e)
+  {
+    std::cerr << "Propagating exception ..."<< std::endl;
+    throw 0;
   }
 }
 
@@ -106,6 +119,7 @@ void ColViz::parseFromFile ( const std::string & pFile )
     {
       case 0:
         std::cout << "Error parsing file:" + pFile + "\n";
+        throw ( 0 );
         break;
       default:
         break;
