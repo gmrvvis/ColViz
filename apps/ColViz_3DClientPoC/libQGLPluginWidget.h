@@ -27,10 +27,10 @@
 
 #include <QGLViewer/qglviewer.h>
 
-#include <BaseMeshRenderer.h>
-#include <IndexedBaseMeshContainer.h>
+#include <colviz/colviz.h>
+#include <colviz/utils/BaseMeshRenderer.h>
+#include <colviz/utils/IndexedBaseMeshContainer.h>
 
-#include <colviz.h>
 
 #include "object.h"
 

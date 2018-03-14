@@ -1,3 +1,6 @@
 [submodule "CMake/common"]
 	path = CMake/common
-	url = https://github.com/Eyescale/CMake
+	url = https://github.com/Eyescale/CMake.git
+[submodule "deps/rapidjson"]
+	path = deps/rapidjson
+	url = https://github.com/Tencent/rapidjson

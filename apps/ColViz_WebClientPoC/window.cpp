@@ -143,7 +143,7 @@ void Window::logInOnPersistenceSystem ( )
     mDBManager->loadSessions( content );
 
     ui->comboBox_sessioId->clear( );
-    for ( int i = 0; i < content.size( ); ++i )
+    for ( size_t i = 0; i < content.size( ); ++i )
     {
       ui->comboBox_sessioId->addItem( QString::fromStdString( content[i] ) );
     }
@@ -170,7 +170,7 @@ void Window::loadDialogsFromPersistenceSystem ( )
       content );
 
   ui->plainTextEdit_chat->setPlainText( "" );
-  for ( int i = 0; i < content.size( ); ++i )
+  for ( size_t i = 0; i < content.size( ); ++i )
   {
     updateChat( QString::fromStdString( content[i] ) );
   }
@@ -222,7 +222,7 @@ void Window::loadURL ( )
 
 void Window::loadPredefinedURL ( )
 {
-  QString lPath = QDir::currentPath( );
+  QString lPath = QCoreApplication::applicationDirPath( );
 
   switch ( ui->comboBox_places->currentIndex( ) )
   {
@@ -230,10 +230,10 @@ void Window::loadPredefinedURL ( )
       ui->lineEdit_url->setText( "https://www.humanbrainproject.eu/en/" );
       break;
     case 1:
-      ui->lineEdit_url->setText( lPath + "/Content/Web/SimpleWebViz/index.html" );
+      ui->lineEdit_url->setText( lPath + "/../content/web/SimpleWebViz/index.html" );
       break;
     case 2:
-      ui->lineEdit_url->setText( lPath + "/Content/Web/WebGL/index.html" );
+      ui->lineEdit_url->setText( lPath + "/../content/web/WebGL/index.html" );
       break;
     default:
       ui->lineEdit_url->setText( "https://www.humanbrainproject.eu/en/" );

@@ -30,7 +30,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-#include <colviz.h>
+#include <colviz/colviz.h>
 
 class webWidget: public QWebEngineView
 {

@@ -164,7 +164,7 @@ void Window::logInOnPersistenceSystem ( )
     mDBManager->loadSessions( content );
 
     ui->comboBox_sessioId->clear( );
-    for ( int i = 0; i < content.size( ); ++i )
+    for ( unsigned int i = 0; i < content.size( ); ++i )
     {
       ui->comboBox_sessioId->addItem( QString::fromStdString( content[i] ) );
     }
@@ -191,7 +191,7 @@ void Window::loadDialogsFromPersistenceSystem ( )
       content );
 
   ui->plainTextEdit_chat->setPlainText( "" );
-  for ( int i = 0; i < content.size( ); ++i )
+  for ( unsigned int i = 0; i < content.size( ); ++i )
   {
     updateChat( QString::fromStdString( content[i] ) );
   }

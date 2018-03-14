@@ -121,7 +121,7 @@ void libQGLPluginWidget::draw ( )
 
         if ( mRepresentationMode == RepresentationMode::ICONIC )
         {
-          for ( int j = 0;
+          for ( unsigned int j = 0;
               j < mSimConections.at( i ).at( mActiveSimStep ).size( ); ++j )
           {
             mAuxTrans2 = mIndexedBaseMeshContainer->getTransformations( ).at(
@@ -234,7 +234,7 @@ void libQGLPluginWidget::loadScene ( std::string pPathToFile )
 
     NSUtils::Vec3 lTransformation;
 
-    for ( int i = 0; i < mIndexedBaseMeshContainer->getNumElements( ); ++i )
+    for ( unsigned int i = 0; i < mIndexedBaseMeshContainer->getNumElements( ); ++i )
     {
       lTransformation =
           mIndexedBaseMeshContainer->getTransformations( ).at( i ).mNodeDist.mPos;

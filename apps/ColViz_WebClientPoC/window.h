@@ -34,8 +34,8 @@
 #include <thread>
 #include <iostream>
 
-#include <colviz.h>
-#include <DBManager.h>
+#include <colviz/colviz.h>
+#include <colviz/DBManager.h>
 
 namespace Ui
 {

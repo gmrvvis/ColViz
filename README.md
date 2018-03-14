@@ -14,25 +14,27 @@ for a complete description and sample data tests.
 * Required dependencies for ColViz Middelware:
     * mysqlcppconn
     * ProtoBuffers
-    * ZeroMQ
-    * RapidJSON (https://github.com/Tencent/rapidjson.git)
+    * RapidJSON (included in this project as submodule)
     * nett (https://devhub.vr.rwth-aachen.de/VR-Group/nett)
 
 * Required dependencies for ColViz Middelware Clients:
-    * Qt 5.8
+    * Qt >= 5.8
     * OpenMesh
     * libQGLViewer
 
+* The following environment variables can be used to indicate the location of the libraries:
+    * NETT_ROOT
+    * MYSQLCONNECTORCPP_ROOT_DIR
+    * OPENMESH_ROOT
 
 ## Building
 
-ColViz Middleware and Clients has been successfully built and used on Ubuntu 16.04 LTS using GCC 6.X.
+ColViz Middleware and Clients has been successfully built and used on Ubuntu 16.04/17.04/17.10 using GCC 6.X.
 Please ensure that you build the Release version in order to get the best performance possible.
 
 ```bash
-git clone https://github.com/gmrvvis/ColViz
+git clone --recursive https://github.com/gmrvvis/ColViz
 mkdir ColViz/build && cd ColViz/build
-git submodule update --init
 cmake .. -DCLONE_SUBPROJECTS=ON
 make
 ```

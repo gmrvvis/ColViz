@@ -49,7 +49,7 @@ void webWidget::buildWidget ( const QUrl& url )
   }
   catch ( const std::exception& )
   {
-    std::exit;
+    std::exit( -1 );
   }
 
   jQuery = file.readAll( );
