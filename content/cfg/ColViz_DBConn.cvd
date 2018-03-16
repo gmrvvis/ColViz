@@ -6,7 +6,7 @@
 		"ip":"127.0.0.1",
 		"port":"3306",
 		"schema":"ColVizDB",
-		"user":"phpmyadmin",
-		"pass":"root42"		
+		"user":"GenericDBUser",
+		"pass":"GenericDBUserPass"		
 	}
 }

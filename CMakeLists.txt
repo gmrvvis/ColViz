@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.2)
-project (ColViz VERSION 0.0.1)
+project (ColViz VERSION 0.1.0)
 set( ColViz_VERSION_ABI 1 )
 
 if(NOT CMAKE_BUILD_TYPE)
